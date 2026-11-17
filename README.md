@@ -37,3 +37,8 @@ Deliverables (all in this repo):
 > Note: the original Practice #09 Bolt.new project was unavailable; this baseline was rebuilt from the same acceptance contract.
 
 Screenshots: ![desktop](screenshots/desktop-overlap.png) ![mobile](screenshots/mobile-available.png)
+
+### AI chat sessions (Tasks #02, #06, optional checklist)
+The three slide prompts were sent to separate, read-only Claude Code sessions (`claude -p`, model `claude-opus-5-5`, tools limited to Read/Grep/Glob) run against the `baseline` tag. Responses are verbatim:
+- Transcripts: `docs/ai-chats/`
+- Screenshots: `screenshots/ai-chats/` (`*-top.png` = first screen, others = full response)

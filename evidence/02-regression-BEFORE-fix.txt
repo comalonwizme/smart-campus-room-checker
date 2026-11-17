@@ -1,0 +1,76 @@
+npm notice run smart-campus-room-checker@0.1.0 test
+npm notice run vitest run
+
+ RUN  v2.1.9 /home/saintholly/smart-campus-checker
+
+ ✓ tests/availability.test.ts (6 tests) 6ms
+ ❯ tests/regression.test.ts (8 tests | 4 failed) 19ms
+   × R-01 invalid calendar dates / non-canonical formats must be rejected (AC1) > rejects 2099-02-31T10:00 → 2099-02-31T11:00 13ms
+     → expected { available: true, …(1) } to match object { available: false, code: 'INVALID' }
+(1 matching property omitted from actual)
+   × R-01 invalid calendar dates / non-canonical formats must be rejected (AC1) > rejects 2099-01-15 10:00 → 2099-01-15 11:00 1ms
+     → expected { available: true, …(1) } to match object { available: false, code: 'INVALID' }
+(1 matching property omitted from actual)
+   × R-01 invalid calendar dates / non-canonical formats must be rejected (AC1) > rejects 2099-01-15T10:00:30 → 2099-01-15T11:00 1ms
+     → expected { available: true, …(1) } to match object { available: false, code: 'INVALID' }
+(1 matching property omitted from actual)
+   × R-02 malformed stored bookings must fail closed (AC4) > does not report "available" when a stored booking cannot be parsed 1ms
+     → expected { available: true, …(1) } to match object { Object (available, code) }
+(1 matching property omitted from actual)
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/regression.test.ts > R-01 invalid calendar dates / non-canonical formats must be rejected (AC1) > rejects 2099-02-31T10:00 → 2099-02-31T11:00
+ FAIL  tests/regression.test.ts > R-01 invalid calendar dates / non-canonical formats must be rejected (AC1) > rejects 2099-01-15 10:00 → 2099-01-15 11:00
+ FAIL  tests/regression.test.ts > R-01 invalid calendar dates / non-canonical formats must be rejected (AC1) > rejects 2099-01-15T10:00:30 → 2099-01-15T11:00
+AssertionError: expected { available: true, …(1) } to match object { available: false, code: 'INVALID' }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  Object {
+-   "available": false,
+-   "code": "INVALID",
++   "available": true,
+  }
+
+ ❯ tests/regression.test.ts:16:64
+     14|     ['2099-01-15T25:00', '2099-01-15T26:00'],
+     15|   ])('rejects %s → %s', (start, end) => {
+     16|     expect(checkAvailability(room, good, { start, end }, now)).toMatch…
+       |                                                                ^
+     17|   });
+     18|   it('still accepts a valid leap day', () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/regression.test.ts > R-02 malformed stored bookings must fail closed (AC4) > does not report "available" when a stored booking cannot be parsed
+AssertionError: expected { available: true, …(1) } to match object { Object (available, code) }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  Object {
+-   "available": false,
+-   "code": "DATA_ERROR",
++   "available": true,
+  }
+
+ ❯ tests/regression.test.ts:27:15
+     25|     const bad: Booking[] = [{ id: 'x', title: 'corrupt', start: 'garba…
+     26|     const r = checkAvailability(room, bad, { start: '2099-01-15T10:00'…
+     27|     expect(r).toMatchObject({ available: false, code: 'DATA_ERROR' });
+       |               ^
+     28|   });
+     29|   it('does not mutate bookings while failing closed (AC6)', () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 10 passed (14)
+   Start at  14:43:07
+   Duration  475ms (transform 68ms, setup 0ms, collect 99ms, tests 25ms, environment 1ms, prepare 170ms)
+
+exit=1

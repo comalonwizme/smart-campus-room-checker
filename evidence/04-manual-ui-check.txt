@@ -1,0 +1,12 @@
+desktop available -> ✅ Room is available for the requested time.
+desktop overlap -> ❌ Conflicts with "Algorithms seminar" (09:00–10:30).
+desktop past -> ❌ The start time is in the past.
+desktop too-short -> ❌ Booking must last between 30 and 120 minutes.
+desktop reversed -> ❌ End time must be after start time.
+desktop horizontal overflow: false
+mobile available -> ✅ Room is available for the requested time.
+mobile overlap -> ❌ Conflicts with "Algorithms seminar" (09:00–10:30).
+mobile past -> ❌ The start time is in the past.
+mobile too-short -> ❌ Booking must last between 30 and 120 minutes.
+mobile reversed -> ❌ End time must be after start time.
+mobile horizontal overflow: false

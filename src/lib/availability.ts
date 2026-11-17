@@ -23,8 +23,25 @@ export type Result =
 export const MIN_MINUTES = 30;
 export const MAX_MINUTES = 120;
 
-function toDate(s: string): Date {
-  return new Date(s);
+const LOCAL_DT = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/;
+
+/**
+ * Strict parser for local "YYYY-MM-DDTHH:MM". Returns null for any other
+ * format and for calendar dates that do not exist (e.g. 2099-02-31), which
+ * `new Date()` would silently roll over.
+ */
+export function parseLocal(s: string): Date | null {
+  const m = LOCAL_DT.exec(s);
+  if (!m) return null;
+  const [y, mo, d, h, mi] = m.slice(1).map(Number);
+  const date = new Date(y, mo - 1, d, h, mi);
+  const ok =
+    date.getFullYear() === y &&
+    date.getMonth() === mo - 1 &&
+    date.getDate() === d &&
+    date.getHours() === h &&
+    date.getMinutes() === mi;
+  return ok ? date : null;
 }
 
 /**
@@ -38,9 +55,9 @@ export function checkAvailability(
   now: Date = new Date(),
 ): Result {
   // AC1 – invalid input
-  const start = toDate(req.start);
-  const end = toDate(req.end);
-  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+  const start = parseLocal(req.start);
+  const end = parseLocal(req.end);
+  if (!start || !end) {
     return { available: false, code: 'INVALID', message: 'Please enter a valid start and end time.' };
   }
   if (end <= start) {
@@ -69,8 +86,16 @@ export function checkAvailability(
 
   // AC4 – overlap with an existing booking (back-to-back is allowed)
   for (const b of bookings) {
-    const bs = toDate(b.start);
-    const be = toDate(b.end);
+    const bs = parseLocal(b.start);
+    const be = parseLocal(b.end);
+    if (!bs || !be || be <= bs) {
+      // Fail closed: a corrupt stored booking must never produce "available".
+      return {
+        available: false,
+        code: 'DATA_ERROR',
+        message: `Cannot verify availability: stored booking "${b.id}" has invalid data.`,
+      };
+    }
     if (start < be && end > bs) {
       return {
         available: false,

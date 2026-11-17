@@ -1,5 +1,7 @@
 # Smart Campus – Room Availability Checker
 
+**Live demo:** https://comalonwizme.github.io/smart-campus-room-checker/
+
 Single fictional room, fictional bookings, no login, no database.
 
 ## Run

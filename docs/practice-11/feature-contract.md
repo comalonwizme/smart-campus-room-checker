@@ -8,7 +8,7 @@ The explanation is optional and secondary. The rule engine (`checkAvailability` 
 ## Architecture and trust boundary
 
 ```mermaid
-flowchart LR
+flowchart TB
   S[Student: start/end times] --> V[Browser input<br/>datetime-local]
   V --> R["Rule engine<br/>checkAvailability()<br/><b>source of truth</b>"]
   R --> D["Decision panel<br/>'Rule check · authoritative'"]
@@ -22,7 +22,11 @@ flowchart LR
   IV -->|invalid| X["'Explanation unavailable'"]
 ```
 
-Written flow (same thing, for readers without Mermaid):
+Rendered diagram (`architecture.png`):
+
+![Architecture and trust boundary](architecture.png)
+
+Written flow (same thing, as text):
 
 ```
 student input → rule engine (decides) → decision panel
@@ -44,7 +48,7 @@ student input → rule engine (decides) → decision panel
 | `roomLabel` | string | 1–60 chars after trim; letters, digits, spaces and `( ) . , - – / #` only |
 | `start`, `end` | `"YYYY-MM-DDTHH:MM"` or `null` | real calendar time (`parseLocal`); max 16 chars; `null` allowed only for `reasonCode: INVALID` |
 | `isAvailable` | boolean | must equal `reasonCode === "OK"` |
-| `reasonCode` | `OK \| INVALID \| PAST \| DURATION \| BLOCKED \| OVERLAP \| DATA_ERROR` | exactly the checker's codes |
+| `reasonCode` | one of `OK`, `INVALID`, `PAST`, `DURATION`, `BLOCKED`, `OVERLAP`, `DATA_ERROR` | exactly the checker's codes |
 | any other key | — | **rejected** (stops booking titles or personal data being added later by mistake) |
 
 Booking titles, booking ids and the checker's human message are deliberately **not** part of the input ("minimal context").

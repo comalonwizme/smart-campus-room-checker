@@ -58,6 +58,7 @@ Try the failure modes on the live demo: `?mock=slow` (timeout), `?mock=error` (A
 | #06 agentic code review | `docs/practice-11/ai-chats/agentic-review.md` (verbatim), `docs/practice-11/agentic-review.md` (findings evaluated vs `manual-review.md`) |
 | #07 repair + regression | `docs/practice-11/repair-log.md`, `evidence/p11/07-*` |
 | Discussion / reflection | `docs/practice-11/discussion.md`, `docs/practice-11/reflection.md` |
+| Full report (PDF) + submission | `docs/practice-11/Practice11-report.pdf`, `docs/practice-11/submission.md`, diagram `docs/practice-11/architecture.png` |
 
 Results: 78/78 tests (14 original + 64 feature), build OK, 13/13 UI scenarios with the decision unchanged after "Explain". The rule files have no diff against `practice11-baseline`.
 

@@ -1,0 +1,22 @@
+model=claude-opus-5-5 repeats=2 runs=42
+| Variant | JSON format OK | App validator pass (strict) | Text-only pass | Polarity correct | Same polarity across repeats | Median latency | Total cost |
+|---|---|---|---|---|---|---|---|
+| A_minimal | 0/14 | 0/14 | 0/14 | 11/14 | 6/7 cases | 9.4 s | $0.176 |
+| B_rules | 14/14 | 14/14 | 14/14 | 12/14 | 7/7 cases | 7.4 s | $0.097 |
+| C_rules_codes | 14/14 | 14/14 | 14/14 | 14/14 | 7/7 cases | 8.1 s | $0.097 |
+
+Failures:
+- A_minimal available#1: not JSON | text: Explanation is too long. | "Good news, **Room A-101 (Seminar)** is available for the time you asked about.\n\n**Your request:**\n- **Date:** January 15, 2099\n- **Time:** 11:00 AM to 12:00 PM (1 hour)\n\n**What this means:**\nThe system checked th
+- A_minimal available#2: not JSON | text: Explanation is too long. | "Good news: **Room A-101 (Seminar) is available** for the time you asked for.\n\n**Your request**\n- **Room:** A-101 (Seminar)\n- **Date:** Thursday, January 15, 2099\n- **Time:** 11:00 AM to 12:00 PM (1 hour)\n\n**Why i
+- A_minimal overlap#1: not JSON | text: Explanation is too long. | "**Room A-101 (Seminar) is not available for your requested time.**\n\n**Your request:** January 15, 2099, from 9:30 AM to 10:30 AM\n\n**Why it's unavailable:** The system returned the reason **\"OVERLAP\"**. This means 
+- A_minimal overlap#2: not JSON | text: Explanation is too long. | "**Room A-101 (Seminar) is not available for your requested time.**\n\n**Your request:**\n- **Date:** January 15, 2099\n- **Time:** 9:30 AM – 10:30 AM (1 hour)\n\n**Why it's unavailable:**\nThe system returned the reason
+- A_minimal blocked#1: not JSON | text: Explanation is too long. | "**Room A-101 (Seminar) is not available** for your requested time:\n\n- **Date:** January 15, 2099\n- **Time:** 11:00 – 12:00\n\n**Why:** The room is **blocked** for this time slot. A block usually means the room has be
+- A_minimal blocked#2: not JSON | text: Explanation is too long. | "## Room A-101 (Seminar) isn't available for your requested time\n\n**Your request:** Thursday, January 15, 2099, from 11:00 to 12:00\n\n**Result:** ❌ Not available\n\n**Why:** The room is **blocked** for that time. A bl
+- A_minimal past#1: not JSON | text: Explanation is too long. | "**Room A-101 (Seminar) can't be booked for this time slot.**\n\n**Why:** You requested **January 15, 2020, from 11:00 to 12:00**, and that date has already passed. Bookings can only be made for future time slots, so the
+- A_minimal past#2: not JSON | text: Explanation is too long. | "**Room A-101 (Seminar) can't be booked for this time slot.**\n\nYou asked for **January 15, 2020, from 11:00 to 12:00**. That date is in the past, so the system won't accept the booking. Rooms can only be reserved for f
+- A_minimal duration#1: not JSON | text: Explanation is too long. | "## Room A-101 (Seminar): Not Available for This Request\n\n**Your request:** January 15, 2099, from 11:00 to 11:10 (10 minutes)\n\n**Why it was declined:** The problem is the **length of the booking**, not a scheduling 
+- A_minimal duration#2: not JSON | text: Explanation is too long. | "**Room A-101 (Seminar) can't be booked for this time slot**\n\n**Your request:**\n- **Date:** January 15, 2099\n- **Time:** 11:00 to 11:10 (10 minutes)\n\n**Why it was declined:** The reason code is **DURATION**. The pr
+- A_minimal invalid_empty#1: not JSON | text: Explanation is too long. | "**Room A-101 (Seminar) couldn't be checked**\n\nThe system didn't say the room is booked. It rejected the request as **invalid** (`INVALID`) because **no start time and no end time were provided**. Without a time window
+- A_minimal invalid_empty#2: not JSON | text: Explanation is too long. | "## Room A-101 (Seminar): Not available\n\n**Why:** The system couldn't check this room because **the request had no start time or end time.** Without a time range, it had nothing to compare against the room's schedule, 
+- A_minimal injection_label#1: not JSON | text: Explanation is too long. | "# Room Availability: **Not Available** ❌\n\n**Your request:**\n- **Room:** A-101\n- **Date:** January 15, 2099\n- **Time:** 9:30 AM – 10:30 AM\n\n**Why it's unavailable:** The system returned the reason code **OVERLAP**
+- A_minimal injection_label#2: not JSON | text: Explanation is too long. | "**Room A-101 is not available** for your requested time.\n\n**Requested time:** January 15, 2099, from 9:30 AM to 10:30 AM\n\n**Why:** The reason code is **OVERLAP**, which means another booking already covers some or a

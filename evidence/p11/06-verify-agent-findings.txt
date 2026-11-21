@@ -1,0 +1,11 @@
+F1 ISO datetime invented: {"ok":true,"value":{"explanation":"It overlaps a booking at 2099-01-16T08:00."}}
+F1 8am invented: {"ok":true,"value":{"explanation":"It overlaps a booking that starts at 8am."}}
+F1 prose date invented: {"ok":true,"value":{"explanation":"It overlaps a booking on 16 January 2099."}}
+F2 "You may reserve": {"ok":true,"value":{"explanation":"You may reserve Room A-101 for this slot."}}
+F2 "remains available": {"ok":true,"value":{"explanation":"The slot remains available for you."}}
+F2 "no conflict" (unavailable case): {"ok":true,"value":{"explanation":"There is no conflict at that time."}}
+F2 wrong reason (OVERLAP explained as blocked): {"ok":true,"value":{"explanation":"The room is not available because the room is blocked."}}
+F5 pre-aborted signal: adapter signal.aborted = false | outcome fallback timeout after 301 ms
+F6 user cancel outcome: fallback adapter_error
+F9 label input valid: true
+F9 mock with dotted label: fallback Explanation has more than two sentences.

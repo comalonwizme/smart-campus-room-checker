@@ -1,0 +1,7 @@
+npm notice run smart-campus-room-checker@0.1.0 npx
+npm notice run 'tsc' --noEmit
+tsc --noEmit exit=0
+
+# No `lint` script is configured in package.json (npm run lint -> "Missing script: lint").
+# The static check used as the lint baseline is TypeScript strict mode: tsc --noEmit (exit 0 above).
+# No linter was added: AGENTS.md forbids new dependencies without approval.

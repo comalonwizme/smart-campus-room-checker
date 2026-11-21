@@ -172,7 +172,9 @@ describe('TC12 untrusted text stays data (prompt-injection boundary)', () => {
   });
 });
 
-describe('TC13 the explanation feature never changes the deterministic decision or bookings (AC1, AC5)', () => {
+// Agent finding F3: this cannot fail by construction (the explain path never receives bookings).
+// It documents isolation; the real AC1 evidence is the empty `git diff practice11-baseline` of the rule files.
+describe('TC13 explain path is isolated from the decision and booking data', () => {
   it.each(['ok', 'error', 'malformed', 'contradict'] as const)('mode %s', async (mode) => {
     const req = { start: '2099-01-15T09:30', end: '2099-01-15T10:30' };
     const before = checkAvailability(room, bookings, req, now);
@@ -188,6 +190,15 @@ describe('TC13 the explanation feature never changes the deterministic decision 
     expect(p.user).not.toContain('Algorithms seminar');
     expect(Object.keys(input).sort()).toEqual(['end', 'isAvailable', 'reasonCode', 'roomLabel', 'start']);
   });
+
+  it('src/lib/explain never imports the bookings data or the rule engine function', () => {
+    const sources = import.meta.glob('../src/lib/explain/*.ts', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+    expect(Object.keys(sources).length).toBeGreaterThanOrEqual(4);
+    for (const [f, code] of Object.entries(sources)) {
+      expect(code, f).not.toMatch(/from ['"][^'"]*data\/bookings['"]/);
+      expect(code, f).not.toMatch(/import\s*\{[^}]*\bcheckAvailability\b[^}]*\}/);
+    }
+  });
 });
 
 describe('demo controls', () => {
@@ -195,5 +206,74 @@ describe('demo controls', () => {
     expect(mockModeFromSearch('?mock=slow')).toBe('slow');
     expect(mockModeFromSearch('?mock=rm -rf')).toBe('ok');
     expect(mockModeFromSearch('')).toBe('ok');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Task #07 regression tests — written before the fixes (see evidence/p11/07-*).
+// ---------------------------------------------------------------------------
+const OK_IN: ExplainInput = { roomLabel: 'Room A-101 (Seminar)', start: '2099-01-15T11:00', end: '2099-01-15T12:00', isAvailable: true, reasonCode: 'OK' };
+const OVERLAP_IN: ExplainInput = { ...OK_IN, start: '2099-01-15T09:30', end: '2099-01-15T10:30', isAvailable: false, reasonCode: 'OVERLAP' };
+const accepts = (text: string, input: ExplainInput) => validateExplanation({ explanation: text }, input).ok;
+
+describe('FIX-1 (agent F2 + manual M1): agreement check must follow the decision and the reason, with negation', () => {
+  it.each([
+    ['You may reserve Room A-101 for this slot.'],
+    ['The slot remains available for you.'],
+    ['There is no conflict at that time.'],
+    ['The room is not available because the room is blocked.'], // wrong reason for OVERLAP
+    ["Room A-101 is not available because it overlaps a booking. You're all set to go ahead with another time."],
+  ])('rejects for an OVERLAP result: %s', (text) => {
+    expect(accepts(text, OVERLAP_IN)).toBe(false);
+  });
+
+  it.each([
+    ["Room A-101 is available on 15 January 2099 from 11:00 to 12:00. You're all set to go ahead with this booking."], // real model output (prompt B)
+    ['Good news, you can go ahead and book it now.'],
+  ])('rejects booking-confirmation language for an available result: %s', (text) => {
+    expect(accepts(text, OK_IN)).toBe(false);
+  });
+
+  it.each([
+    ['The room is free from 11:00 to 12:00 because it does not overlap any existing booking.'],
+    ['Good news: there is no conflict, so the room is free for that slot.'],
+    ['Room A-101 is available, and nothing is blocked at that time.'],
+  ])('accepts correct negated wording for an available result: %s', (text) => {
+    expect(accepts(text, OK_IN)).toBe(true);
+  });
+
+  it('every mock explanation still passes for every reason code', async () => {
+    const inputs: ExplainInput[] = [
+      OK_IN,
+      OVERLAP_IN,
+      { ...OVERLAP_IN, reasonCode: 'BLOCKED' },
+      { ...OVERLAP_IN, reasonCode: 'PAST' },
+      { ...OVERLAP_IN, reasonCode: 'DURATION' },
+      { ...OVERLAP_IN, start: null, end: null, reasonCode: 'INVALID' },
+      { ...OVERLAP_IN, reasonCode: 'DATA_ERROR' },
+    ];
+    for (const input of inputs) expect((await explainAvailability(input, fast())).kind, input.reasonCode).toBe('generated');
+  });
+});
+
+describe('FIX-2 (agent F1 + manual M4): invented times and dates in any common format are rejected', () => {
+  it.each([
+    ['It overlaps a booking at 2099-01-16T08:00.'],
+    ['It is not available because it overlaps a booking that starts at 8am.'],
+    ['It is not available because it overlaps a booking until 10:45 pm.'],
+    ['It is not available because it overlaps a booking on 16 January 2099.'],
+    ['It is not available because it overlaps a booking on January 16, 2099.'],
+    ['It is not available because it overlaps a booking on 16/01/2099.'],
+    ['It is not available on Friday because it overlaps an existing booking.'], // 2099-01-15 is a Thursday
+  ])('rejects: %s', (text) => {
+    expect(accepts(text, OVERLAP_IN)).toBe(false);
+  });
+
+  it.each([
+    ['Room A-101 is not available from 09:30 to 10:30 on 15 January 2099 because the requested time overlaps an existing booking.'],
+    ['It is not available from 9:30 am to 10:30 am on Thursday, January 15, 2099, because it overlaps an existing booking.'],
+    ['It is not available on 2099-01-15 from 09:30 to 10:30 because it overlaps an existing booking.'],
+  ])('accepts the real date and times written in other formats: %s', (text) => {
+    expect(accepts(text, OVERLAP_IN)).toBe(true);
   });
 });

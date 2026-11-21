@@ -1,0 +1,2 @@
+$ git diff --stat practice11-baseline -- src/lib/availability.ts src/data/bookings.ts tests/availability.test.ts tests/regression.test.ts package.json package-lock.json
+(diff lines: 0)

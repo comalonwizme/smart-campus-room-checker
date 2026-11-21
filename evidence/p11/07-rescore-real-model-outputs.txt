@@ -1,0 +1,7 @@
+REJECTED B_rules available#1: Explanation claims or invites a booking action.
+  Good news: Room A-101 (Seminar) is available for your requested time on 15 January 2099 from 11:00 to 12:00. You can go ahead and use it for that slot.
+REJECTED B_rules available#2: Explanation claims or invites a booking action.
+  Good news: Room A-101 (Seminar) is available for your requested time on 15 January 2099 from 11:00 to 12:00. You're all set to go ahead with this booking.
+A_minimal: 0/14 accepted
+B_rules: 12/14 accepted
+C_rules_codes: 14/14 accepted

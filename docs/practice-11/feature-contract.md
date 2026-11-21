@@ -64,11 +64,11 @@ Booking titles, booking ids and the checker's human message are deliberately **n
 
 | AC | Criterion | How it is enforced | Test |
 |---|---|---|---|
-| AC1 | Existing availability and overlap rules remain unchanged | `availability.ts`, `bookings.ts` and the old tests are untouched (`git diff practice11-baseline` = 0 lines); the feature only reads the result | old 14 tests; TC13 |
+| AC1 | Existing availability and overlap rules remain unchanged | `availability.ts`, `bookings.ts` and the old tests are untouched (`git diff practice11-baseline` = 0 lines); the feature only reads the result | old 14 tests; empty `git diff` of rule files (`evidence/p11/07-ac1-diff.txt`); TC13 import check |
 | AC2 | Explanation agrees with the deterministic result; no invented booking details | output validator rules 5–6; booking titles never sent | TC01–TC05, TC10b, TC11, TC12 |
 | AC3 | Empty, malformed or overly long input is rejected | `validateExplainInput` runs before any adapter call | TC06, TC07 (adapter spy never called) |
 | AC4 | Timeout, API error or unavailable key → safe fallback | 4 s timeout + `AbortController`; any throw → fallback; fallback text is a fixed template per reason code | TC08, TC09, TC10 |
-| AC5 | User can tell a generated explanation from the confirmed booking status | separate panels and labels: "Rule check · authoritative" vs "AI-generated explanation · Mock AI" vs "Standard explanation · AI not used"; disclaimer under the AI text | UI check (screenshots), TC13 |
+| AC5 | User can tell a generated explanation from the confirmed booking status | separate panels and labels: "Rule check · authoritative" vs "AI-generated explanation · Mock AI" vs "Standard explanation · AI not used"; disclaimer under the AI text | **manual/scripted UI check only** (`scripts/p11-screenshots.mjs`, screenshots). No unit test: a DOM test library would be a new dependency (agent finding F4) |
 
 ## Failure behaviour
 

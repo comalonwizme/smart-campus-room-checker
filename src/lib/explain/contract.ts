@@ -103,33 +103,135 @@ export function toExplainInput(room: Room, req: Request, result: Result): Explai
 
 // --- output validation -------------------------------------------------------
 
-const SAYS_UNAVAILABLE =
-  /\b(not available|unavailable|isn't available|is not free|not free|cannot be booked|can't be booked|conflicts?|overlaps?|blocked|already booked|is taken|occupied|in the past|invalid)\b/i;
-const SAYS_AVAILABLE = /\b(is available|is free|you can book|can be booked|is open for)\b/i;
-/** The explanation must never pretend an action happened. */
+/** The explanation must never pretend an action happened or invite the user to treat it as a booking (AC5). */
 const CLAIMS_ACTION =
-  /\b(booked (it )?for you|i (have )?(booked|reserved)|has been (booked|reserved|confirmed)|booking (is )?confirmed|confirmation (number|code)|reservation (is )?confirmed)\b/i;
+  /\b(booked (it )?for you|i (have )?(booked|reserved)|has been (booked|reserved|confirmed)|booking (is )?confirmed|confirmation (number|code)|reservation (is )?confirmed|all set|go ahead)\b/i;
 const MARKUP = /[<>{}`]|\]\(|https?:\/\//i;
+
+/**
+ * Words that say "this decision is negative". A match only counts when it is
+ * not negated ("does not overlap", "no conflict", "nothing is blocked").
+ */
+const NEGATIVE_DECISION =
+  /\b(not available|unavailable|isn't available|not free|cannot be|can't be|could not be|couldn't be|refused|in the past|already passed|outside|overlaps?|overlapping|conflicts?|blocked|already booked|is taken|occupied|invalid)\b/gi;
+/** Words that say "this slot can be used". Also only counted when not negated. */
+const POSITIVE_DECISION =
+  /\b(available|free|bookable|you can book|you can reserve|you may book|you may reserve|can be booked|can be reserved|is open for)\b/gi;
+
+/** At least one of these (negated or not) must appear, so the stated reason matches `reasonCode`. */
+const REASON_TERMS: Record<ReasonCode, RegExp> = {
+  OK: /\b(available|free)\b/i,
+  OVERLAP: /\b(overlaps?|overlapping|conflicts?|already booked|existing booking)\b/i,
+  BLOCKED: /\bblocked\b/i,
+  PAST: /\b(past|already passed|has passed|already started)\b/i,
+  DURATION: /\b(minutes?|duration|length|too short|too long)\b/i,
+  INVALID: /\b(valid|invalid|missing|malformed|entered|could not be checked|couldn't be checked)\b/i,
+  DATA_ERROR: /\b(data|verif\w*)\b/i,
+};
+
+const NEGATORS = /^(not|no|never|nothing|none|nobody|without|cannot|nor|neither|\w+n't)$/i;
+const CLAUSE_BREAK = /^(because|but|so|since|although|though|however|while|yet|whereas)$/i;
+
+/** True when one of the (up to) four words before `index`, in the same clause, is a negator. */
+function isNegated(text: string, index: number): boolean {
+  const before = text.slice(0, index);
+  const clause = before.split(/[,;:.!?()]/).pop() ?? '';
+  const words = clause.trim().split(/\s+/).filter(Boolean);
+  for (let i = words.length - 1, seen = 0; i >= 0 && seen < 4; i--, seen++) {
+    if (CLAUSE_BREAK.test(words[i])) return false;
+    if (NEGATORS.test(words[i].replace(/[’]/g, "'"))) return true;
+  }
+  return false;
+}
+
+function hasAffirmed(text: string, pattern: RegExp): string | null {
+  for (const m of text.matchAll(pattern)) if (!isNegated(text, m.index ?? 0)) return m[0];
+  return null;
+}
 
 function countSentences(text: string): number {
   return text.split(/[.!?]+(?:\s+|$)/).filter((s) => s.trim().length > 0).length;
 }
 
-function allowedClockTimes(input: ExplainInput): Set<string> {
-  const out = new Set<string>();
+// --- invented time / date detection (FIX-2) --------------------------------------
+
+const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+const MONTH_RE = '(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.?';
+
+function toMinutes(h: number, m: number, ampm?: string): number {
+  let hh = h;
+  if (ampm) {
+    const pm = ampm.toLowerCase() === 'pm';
+    if (hh === 12) hh = pm ? 12 : 0;
+    else if (pm) hh += 12;
+  }
+  return hh * 60 + m;
+}
+
+interface DateFacts {
+  minutes: Set<number>;
+  days: { y: number; m: number; d: number; weekday: number }[];
+}
+
+function factsOf(input: ExplainInput): DateFacts {
+  const minutes = new Set<number>();
+  const days: DateFacts['days'] = [];
   for (const t of [input.start, input.end]) {
     if (!t) continue;
-    const hhmm = t.slice(11);
-    out.add(hhmm);
-    out.add(String(Number(hhmm.slice(0, 2))) + hhmm.slice(2)); // "09:00" -> "9:00"
+    const date = parseLocal(t);
+    if (!date) continue;
+    minutes.add(date.getHours() * 60 + date.getMinutes());
+    days.push({ y: date.getFullYear(), m: date.getMonth() + 1, d: date.getDate(), weekday: date.getDay() });
   }
-  return out;
+  return { minutes, days };
+}
+
+/** Returns the first clock time, date or weekday in `text` that is not one of the input's. */
+function findInventedDateTime(text: string, input: ExplainInput): string | null {
+  const facts = factsOf(input);
+  const dayKnown = (d: number, m: number, y?: number) =>
+    facts.days.some((f) => f.d === d && f.m === m && (y === undefined || f.y === y));
+  // "2099-01-15T09:30" -> "2099-01-15 09:30" so both halves are checked.
+  const t = text.replace(/(\d{4}-\d{2}-\d{2})T(\d{1,2}:\d{2})/g, '$1 $2');
+
+  // Clock times: "09:30", "9:30 am", "10:45pm", "8am".
+  for (const m of t.matchAll(/\b(\d{1,2}):(\d{2})\s*(am|pm|a\.m\.|p\.m\.)?(?![\w])/gi)) {
+    const ampm = m[3]?.replace(/\./g, '');
+    if (!facts.minutes.has(toMinutes(Number(m[1]), Number(m[2]), ampm))) return m[0];
+  }
+  for (const m of t.matchAll(/(?<![:.\d])\b(\d{1,2})\s*(am|pm|a\.m\.|p\.m\.)(?![\w])/gi)) {
+    if (!facts.minutes.has(toMinutes(Number(m[1]), 0, m[2].replace(/\./g, '')))) return m[0];
+  }
+  // ISO dates.
+  for (const m of t.matchAll(/\b(\d{4})-(\d{2})-(\d{2})\b/g)) {
+    if (!dayKnown(Number(m[3]), Number(m[2]), Number(m[1]))) return m[0];
+  }
+  // "15 January 2099", "15th Jan".
+  for (const m of t.matchAll(new RegExp(`\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+(?:of\\s+)?${MONTH_RE}(?:,?\\s+(\\d{4}))?`, 'gi'))) {
+    if (!dayKnown(Number(m[1]), MONTHS.indexOf(m[2].toLowerCase()) + 1, m[3] ? Number(m[3]) : undefined)) return m[0];
+  }
+  // "January 15, 2099", "Jan 15".
+  for (const m of t.matchAll(new RegExp(`\\b${MONTH_RE}\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b(?:,?\\s+(\\d{4}))?`, 'gi'))) {
+    if (!dayKnown(Number(m[2]), MONTHS.indexOf(m[1].toLowerCase()) + 1, m[3] ? Number(m[3]) : undefined)) return m[0];
+  }
+  // "16/01/2099" or "01/16/2099": accepted if either reading is the input date.
+  for (const m of t.matchAll(/\b(\d{1,2})[/.](\d{1,2})[/.](\d{4})\b/g)) {
+    const [a, b, y] = [Number(m[1]), Number(m[2]), Number(m[3])];
+    if (!dayKnown(a, b, y) && !dayKnown(b, a, y)) return m[0];
+  }
+  // Weekday names must match the input date.
+  for (const m of t.matchAll(/\b(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/gi)) {
+    const wd = WEEKDAYS.indexOf(m[1].toLowerCase());
+    if (!facts.days.some((f) => f.weekday === wd)) return m[0];
+  }
+  return null;
 }
 
 /**
  * AC2: the model output must be `{ explanation: string }`, short, plain text,
- * at most two sentences, consistent with the deterministic decision, and must
- * not mention clock times or dates that were not in the input.
+ * at most two sentences, consistent with the deterministic decision AND its
+ * reason, and must not mention times, dates or weekdays that are not in the input.
  */
 export function validateExplanation(raw: unknown, input: ExplainInput): Validation<ExplainOutput> {
   if (!isPlainObject(raw)) return { ok: false, error: 'Output must be an object.' };
@@ -142,23 +244,26 @@ export function validateExplanation(raw: unknown, input: ExplainInput): Validati
   if (text.length > LIMITS.explanationMax) return { ok: false, error: 'Explanation is too long.' };
   if (MARKUP.test(text)) return { ok: false, error: 'Explanation contains markup or links.' };
   if (countSentences(text) > LIMITS.maxSentences) return { ok: false, error: 'Explanation has more than two sentences.' };
-  if (CLAIMS_ACTION.test(text)) return { ok: false, error: 'Explanation claims a booking action.' };
+  if (CLAIMS_ACTION.test(text)) return { ok: false, error: 'Explanation claims or invites a booking action.' };
 
-  if (input.isAvailable && SAYS_UNAVAILABLE.test(text)) {
-    return { ok: false, error: 'Explanation contradicts the result (says unavailable).' };
+  // FIX-1: polarity, negation-aware, fail closed.
+  const negative = hasAffirmed(text, NEGATIVE_DECISION);
+  const positive = hasAffirmed(text, POSITIVE_DECISION);
+  if (input.isAvailable) {
+    if (negative) return { ok: false, error: `Explanation contradicts the result (says "${negative}").` };
+    if (!positive) return { ok: false, error: 'Explanation does not state that the room is available.' };
+  } else {
+    if (positive) return { ok: false, error: `Explanation contradicts the result (says "${positive}").` };
+    if (!negative) return { ok: false, error: 'Explanation does not state that the request was refused.' };
   }
-  if (!input.isAvailable && SAYS_AVAILABLE.test(text)) {
-    return { ok: false, error: 'Explanation contradicts the result (says available).' };
+  if (!REASON_TERMS[input.reasonCode].test(text)) {
+    return { ok: false, error: `Explanation does not mention the reason (${input.reasonCode}).` };
   }
 
-  const allowed = allowedClockTimes(input);
-  for (const m of text.matchAll(/\b\d{1,2}:\d{2}\b/g)) {
-    if (!allowed.has(m[0])) return { ok: false, error: `Explanation mentions a time not in the input (${m[0]}).` };
-  }
-  const dates = new Set([input.start, input.end].filter(Boolean).map((t) => (t as string).slice(0, 10)));
-  for (const m of text.matchAll(/\b\d{4}-\d{2}-\d{2}\b/g)) {
-    if (!dates.has(m[0])) return { ok: false, error: `Explanation mentions a date not in the input (${m[0]}).` };
-  }
+  // FIX-2: no invented times, dates or weekdays.
+  const invented = findInventedDateTime(text, input);
+  if (invented) return { ok: false, error: `Explanation mentions a time or date not in the input (${invented}).` };
+
   return { ok: true, value: { explanation: text } };
 }
 

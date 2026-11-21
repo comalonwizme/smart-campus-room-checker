@@ -1,0 +1,55 @@
+desktop 01-available [mock=ok] 838ms
+  decision: Rule check · authoritative✅ Room is available for the requested time.
+  decision unchanged after explain: true
+  panel: AI-generated explanation · Mock AI (no real model)Good news: Room A-101 (Seminar) is free from 11:00 to 12:00 because no rule or existing booking stops this request.This text was written by an AI from the rule-check result. It is not a booking confirmation and does not change availability.
+desktop 02-overlap [mock=ok] 827ms
+  decision: Rule check · authoritative❌ Conflicts with "Algorithms seminar" (09:00–10:30).
+  decision unchanged after explain: true
+  panel: AI-generated explanation · Mock AI (no real model)Room A-101 (Seminar) is not available from 09:30 to 10:30 because that time overlaps an existing booking. Please try a different time.This text was written by an AI from the rule-check result. It is not a booking confirmation and does not change availability.
+desktop 03-past [mock=ok] 825ms
+  decision: Rule check · authoritative❌ The start time is in the past.
+  decision unchanged after explain: true
+  panel: AI-generated explanation · Mock AI (no real model)The requested start time has already passed, so this slot cannot be booked. Please choose a future time.This text was written by an AI from the rule-check result. It is not a booking confirmation and does not change availability.
+desktop 04-invalid-reversed [mock=ok] 822ms
+  decision: Rule check · authoritative❌ End time must be after start time.
+  decision unchanged after explain: true
+  panel: AI-generated explanation · Mock AI (no real model)The times you entered could not be checked. Please enter a valid start time and an end time after it.This text was written by an AI from the rule-check result. It is not a booking confirmation and does not change availability.
+desktop 05-empty-input [mock=ok] 820ms
+  decision: Rule check · authoritative❌ Please enter a valid start and end time.
+  decision unchanged after explain: true
+  panel: AI-generated explanation · Mock AI (no real model)The times you entered could not be checked. Please enter a valid start time and an end time after it.This text was written by an AI from the rule-check result. It is not a booking confirmation and does not change availability.
+desktop 06-too-short [mock=ok] 821ms
+  decision: Rule check · authoritative❌ Booking must last between 30 and 120 minutes.
+  decision unchanged after explain: true
+  panel: AI-generated explanation · Mock AI (no real model)Bookings must be between 30 and 120 minutes long, and this request is outside that range.This text was written by an AI from the rule-check result. It is not a booking confirmation and does not change availability.
+desktop 07-timeout [mock=slow] 4339ms
+  decision: Rule check · authoritative❌ Conflicts with "Algorithms seminar" (09:00–10:30).
+  decision unchanged after explain: true
+  panel: Standard explanation · AI not usedThe requested time overlaps an existing booking, so the room is not free for that slot.Shown because the AI service took too long. The availability result above is unaffected.
+desktop 08-api-failure [mock=error] 819ms
+  decision: Rule check · authoritative❌ Conflicts with "Algorithms seminar" (09:00–10:30).
+  decision unchanged after explain: true
+  panel: Standard explanation · AI not usedThe requested time overlaps an existing booking, so the room is not free for that slot.Shown because the AI service is unavailable. The availability result above is unaffected.
+desktop 09-contradicting-output [mock=contradict] 822ms
+  decision: Rule check · authoritative✅ Room is available for the requested time.
+  decision unchanged after explain: true
+  panel: Standard explanation · AI not usedThe requested time passed every booking rule, so the room is free for that slot.Shown because the AI answer failed our safety checks. The availability result above is unaffected.
+desktop 10-malformed-output [mock=malformed] 820ms
+  decision: Rule check · authoritative❌ Conflicts with "Algorithms seminar" (09:00–10:30).
+  decision unchanged after explain: true
+  panel: Standard explanation · AI not usedThe requested time overlaps an existing booking, so the room is not free for that slot.Shown because the AI answer failed our safety checks. The availability result above is unaffected.
+desktop horizontal overflow: false
+mobile 01-available [mock=ok] 835ms
+  decision: Rule check · authoritative✅ Room is available for the requested time.
+  decision unchanged after explain: true
+  panel: AI-generated explanation · Mock AI (no real model)Good news: Room A-101 (Seminar) is free from 11:00 to 12:00 because no rule or existing booking stops this request.This text was written by an AI from the rule-check result. It is not a booking confirmation and does not change availability.
+mobile 02-overlap [mock=ok] 820ms
+  decision: Rule check · authoritative❌ Conflicts with "Algorithms seminar" (09:00–10:30).
+  decision unchanged after explain: true
+  panel: AI-generated explanation · Mock AI (no real model)Room A-101 (Seminar) is not available from 09:30 to 10:30 because that time overlaps an existing booking. Please try a different time.This text was written by an AI from the rule-check result. It is not a booking confirmation and does not change availability.
+mobile 07-timeout [mock=slow] 4335ms
+  decision: Rule check · authoritative❌ Conflicts with "Algorithms seminar" (09:00–10:30).
+  decision unchanged after explain: true
+  panel: Standard explanation · AI not usedThe requested time overlaps an existing booking, so the room is not free for that slot.Shown because the AI service took too long. The availability result above is unaffected.
+mobile horizontal overflow: false
+ALL UI CHECKS PASSED

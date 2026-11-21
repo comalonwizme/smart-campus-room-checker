@@ -1,0 +1,37 @@
+ ✓ tests/availability.test.ts (6 tests) 5ms
+ ✓ tests/regression.test.ts (8 tests) 5ms
+   × FIX-1 (agent F2 + manual M1): agreement check must follow the decision and the reason, with negation > rejects for an OVERLAP result: You may reserve Room A-101 for this slot. 7ms
+   × FIX-1 (agent F2 + manual M1): agreement check must follow the decision and the reason, with negation > rejects for an OVERLAP result: The slot remains available for you. 1ms
+   × FIX-1 (agent F2 + manual M1): agreement check must follow the decision and the reason, with negation > rejects for an OVERLAP result: There is no conflict at that time. 1ms
+   × FIX-1 (agent F2 + manual M1): agreement check must follow the decision and the reason, with negation > rejects for an OVERLAP result: The room is not available because the room is blocked. 1ms
+   × FIX-1 (agent F2 + manual M1): agreement check must follow the decision and the reason, with negation > rejects for an OVERLAP result: Room A-101 is not available because it overlaps a booking. You're all set to go ahead with another time. 1ms
+   × FIX-1 (agent F2 + manual M1): agreement check must follow the decision and the reason, with negation > rejects booking-confirmation language for an available result: Room A-101 is available on 15 January 2099 from 11:00 to 12:00. You're all set to go ahead with this booking. 1ms
+   × FIX-1 (agent F2 + manual M1): agreement check must follow the decision and the reason, with negation > rejects booking-confirmation language for an available result: Good news, you can go ahead and book it now. 1ms
+   × FIX-1 (agent F2 + manual M1): agreement check must follow the decision and the reason, with negation > accepts correct negated wording for an available result: The room is free from 11:00 to 12:00 because it does not overlap any existing booking. 1ms
+   × FIX-1 (agent F2 + manual M1): agreement check must follow the decision and the reason, with negation > accepts correct negated wording for an available result: Good news: there is no conflict, so the room is free for that slot. 0ms
+   × FIX-1 (agent F2 + manual M1): agreement check must follow the decision and the reason, with negation > accepts correct negated wording for an available result: Room A-101 is available, and nothing is blocked at that time. 1ms
+   × FIX-2 (agent F1 + manual M4): invented times and dates in any common format are rejected > rejects: It overlaps a booking at 2099-01-16T08:00. 0ms
+   × FIX-2 (agent F1 + manual M4): invented times and dates in any common format are rejected > rejects: It is not available because it overlaps a booking that starts at 8am. 0ms
+   × FIX-2 (agent F1 + manual M4): invented times and dates in any common format are rejected > rejects: It is not available because it overlaps a booking on 16 January 2099. 0ms
+   × FIX-2 (agent F1 + manual M4): invented times and dates in any common format are rejected > rejects: It is not available because it overlaps a booking on January 16, 2099. 0ms
+   × FIX-2 (agent F1 + manual M4): invented times and dates in any common format are rejected > rejects: It is not available because it overlaps a booking on 16/01/2099. 0ms
+   × FIX-2 (agent F1 + manual M4): invented times and dates in any common format are rejected > rejects: It is not available on Friday because it overlaps an existing booking. 0ms
+⎯⎯⎯⎯⎯⎯ Failed Tests 16 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  tests/explain.test.ts > FIX-1 (agent F2 + manual M1): agreement check must follow the decision and the reason, with negation > rejects for an OVERLAP result: You may reserve Room A-101 for this slot.
+ FAIL  tests/explain.test.ts > FIX-1 (agent F2 + manual M1): agreement check must follow the decision and the reason, with negation > rejects for an OVERLAP result: The slot remains available for you.
+ FAIL  tests/explain.test.ts > FIX-1 (agent F2 + manual M1): agreement check must follow the decision and the reason, with negation > rejects for an OVERLAP result: There is no conflict at that time.
+ FAIL  tests/explain.test.ts > FIX-1 (agent F2 + manual M1): agreement check must follow the decision and the reason, with negation > rejects for an OVERLAP result: The room is not available because the room is blocked.
+ FAIL  tests/explain.test.ts > FIX-1 (agent F2 + manual M1): agreement check must follow the decision and the reason, with negation > rejects for an OVERLAP result: Room A-101 is not available because it overlaps a booking. You're all set to go ahead with another time.
+ FAIL  tests/explain.test.ts > FIX-1 (agent F2 + manual M1): agreement check must follow the decision and the reason, with negation > rejects booking-confirmation language for an available result: Room A-101 is available on 15 January 2099 from 11:00 to 12:00. You're all set to go ahead with this booking.
+ FAIL  tests/explain.test.ts > FIX-1 (agent F2 + manual M1): agreement check must follow the decision and the reason, with negation > rejects booking-confirmation language for an available result: Good news, you can go ahead and book it now.
+ FAIL  tests/explain.test.ts > FIX-1 (agent F2 + manual M1): agreement check must follow the decision and the reason, with negation > accepts correct negated wording for an available result: The room is free from 11:00 to 12:00 because it does not overlap any existing booking.
+ FAIL  tests/explain.test.ts > FIX-1 (agent F2 + manual M1): agreement check must follow the decision and the reason, with negation > accepts correct negated wording for an available result: Good news: there is no conflict, so the room is free for that slot.
+ FAIL  tests/explain.test.ts > FIX-1 (agent F2 + manual M1): agreement check must follow the decision and the reason, with negation > accepts correct negated wording for an available result: Room A-101 is available, and nothing is blocked at that time.
+ FAIL  tests/explain.test.ts > FIX-2 (agent F1 + manual M4): invented times and dates in any common format are rejected > rejects: It overlaps a booking at 2099-01-16T08:00.
+ FAIL  tests/explain.test.ts > FIX-2 (agent F1 + manual M4): invented times and dates in any common format are rejected > rejects: It is not available because it overlaps a booking that starts at 8am.
+ FAIL  tests/explain.test.ts > FIX-2 (agent F1 + manual M4): invented times and dates in any common format are rejected > rejects: It is not available because it overlaps a booking on 16 January 2099.
+ FAIL  tests/explain.test.ts > FIX-2 (agent F1 + manual M4): invented times and dates in any common format are rejected > rejects: It is not available because it overlaps a booking on January 16, 2099.
+ FAIL  tests/explain.test.ts > FIX-2 (agent F1 + manual M4): invented times and dates in any common format are rejected > rejects: It is not available because it overlaps a booking on 16/01/2099.
+ FAIL  tests/explain.test.ts > FIX-2 (agent F1 + manual M4): invented times and dates in any common format are rejected > rejects: It is not available on Friday because it overlaps an existing booking.
+ Test Files  1 failed | 2 passed (3)
+      Tests  16 failed | 61 passed (77)

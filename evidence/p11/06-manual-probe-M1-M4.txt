@@ -1,0 +1,5 @@
+M1 available: {"ok":false,"error":"Explanation contradicts the result (says unavailable)."} <- The room is free from 11:00 to 12:00 because it does not overlap any existing booking.
+M1 available: {"ok":false,"error":"Explanation contradicts the result (says unavailable)."} <- Good news: there is no conflict, so the room is free for that slot.
+M1 available: {"ok":false,"error":"Explanation contradicts the result (says unavailable)."} <- Room A-101 is available; nothing is blocked at that time.
+gap: {"ok":true,"value":{"explanation":"Room A-101 is available on 15 January 2099 from 11:00 to 12:00. You're all set to go ahead with this booking."}} <- Room A-101 is available on 15 January 2099 from 11:00 to 12:00. You're all set to go ahead with this booking.
+gap: {"ok":true,"value":{"explanation":"The room is not available because it overlaps a booking on 16 January 2099."}} <- The room is not available because it overlaps a booking on 16 January 2099.

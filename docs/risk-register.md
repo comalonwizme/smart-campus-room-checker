@@ -19,3 +19,14 @@ The initial review was produced by an AI reviewer (Claude Code, read-only pass, 
 2. **R-01** (score 4) — ties with R-05/R-06/R-07 at 4; chosen over them because it is a direct acceptance-contract (AC1) violation and is verifiable by a test. R-07 was also fixed because the task requires an AGENTS.md patch (Task #06).
 
 Residual-risk scores are my estimate after verified tests; they are judgement, not measurement.
+
+## Practice #11 additions — "Explain availability" (LLM) feature
+
+| ID | Category | Cause → Event → Consequence | Component | Evidence | Status | L×I before | Mitigation | After |
+|----|----------|-----------------------------|-----------|----------|--------|-----------|------------|-------|
+| R-11 | Correctness / trust | Model text implies a booking or contradicts the decision → student believes the wrong outcome | `validateExplanation` | Agent F2; real prompt-B output "You're all set to go ahead with this booking" was accepted | **confirmed** | 2×3 = 6 | FIX-1: negation-aware, fail-closed polarity + reason terms + "go ahead/all set" banned; labelled AI panel | 1×3 = 3 |
+| R-12 | Correctness | Model invents a time or date in prose/ISO-T/am-pm form → "no invented details" (AC2) broken | `validateExplanation` | Agent F1, my M4; probes accepted 6 invented values | **confirmed** | 2×2 = 4 | FIX-2: `findInventedDateTime` | 1×2 = 2 |
+| R-13 | Quality | Correct negated wording rejected → needless fallback | `validateExplanation` | My M1; probes | **confirmed** | 2×1 = 2 | FIX-1 | 1×1 = 1 |
+| R-14 | Reliability | Real model latency > 4 s timeout → frequent fallback | `explainAvailability` | CLI median 7–9 s (includes start-up) | **plausible** | 3×1 = 3 | Fallback is safe; measure API latency server-side before going live | 3 (open) |
+| R-15 | Security | API key exposed if a real adapter runs in the browser | (future adapter) | Mock only today; AGENTS.md rule added | **plausible (future)** | 1×3 = 3 | Server-side adapter only; no `VITE_*` secrets | 3 (open) |
+| R-16 | Reliability | Cancel not propagated / reported as error | `explain.ts` | Agent F5, F6 reproduced | **confirmed** | 1×1 = 1 | Open (UI discards stale results) | 1 (open) |

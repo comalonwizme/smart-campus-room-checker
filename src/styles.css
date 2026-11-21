@@ -13,3 +13,21 @@ button { background: #2f5bea; color: #fff; border: 0; cursor: pointer; }
 .ok { background: #dff6e4; }
 .bad { background: #fde2e2; }
 @media (min-width: 600px) { .form { grid-template-columns: 1fr 1fr; } .form button { grid-column: 1 / -1; } }
+
+/* Practice #11 — rule-check result vs AI explanation are visually distinct (AC5) */
+.decision { margin: 6px 0 0; font-weight: 600; }
+.tag { display: inline-block; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; }
+.tag-rule { background: #1b2333; color: #fff; }
+.tag-ai { background: #ece6ff; color: #4b2db3; }
+.tag-warn { background: #fff1cc; color: #7a5200; }
+.explain { margin-top: 20px; }
+.explain-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.explain-head h2 { margin: 0; font-size: 1.1rem; }
+button.secondary { background: #fff; color: #4b2db3; border: 1px solid #b9a8f0; }
+button:disabled { opacity: 0.6; cursor: progress; }
+.explanation { margin-top: 12px; padding: 12px; border-radius: 8px; border: 1px dashed #b9a8f0; background: #faf8ff; }
+.explanation p { margin: 6px 0 0; }
+.explanation.fallback, .explanation.error { border-color: #e0c36a; background: #fffbef; }
+.explanation.pending { color: #55607a; font-style: italic; }
+.fineprint { font-size: 0.85rem; color: #55607a; }
+.demo-note { font-size: 0.85rem; color: #7a5200; margin: 8px 0 0; }

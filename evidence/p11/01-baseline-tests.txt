@@ -1,0 +1,13 @@
+npm notice run smart-campus-room-checker@0.1.0 test
+npm notice run vitest run
+
+ RUN  v2.1.9 /home/saintholly/smart-campus-checker
+
+ ✓ tests/availability.test.ts (6 tests) 6ms
+ ✓ tests/regression.test.ts (8 tests) 5ms
+
+ Test Files  2 passed (2)
+      Tests  14 passed (14)
+   Start at  12:11:14
+   Duration  378ms (transform 68ms, setup 0ms, collect 81ms, tests 11ms, environment 0ms, prepare 153ms)
+
